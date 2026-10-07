@@ -1,0 +1,107 @@
+[
+    {
+        "kategori": "Makanan",
+        "nama": "Oreo 133g",
+        "harga": 10000,
+        "stok": 47,
+        "kadaluarsa": "25-12-2026"
+    },
+    {
+        "kategori": "Makanan",
+        "nama": "Sari Roti Gandum",
+        "harga": 18000,
+        "stok": 19,
+        "kadaluarsa": "10-10-2026"
+    },
+    {
+        "kategori": "Makanan",
+        "nama": "Indomie Goreng",
+        "harga": 3500,
+        "stok": 199,
+        "kadaluarsa": "15-08-2027"
+    },
+    {
+        "kategori": "Makanan",
+        "nama": "Chitato Sapi Panggang",
+        "harga": 12500,
+        "stok": 40,
+        "kadaluarsa": "20-11-2026"
+    },
+    {
+        "kategori": "Makanan",
+        "nama": "Beng-Beng Coklat",
+        "harga": 2500,
+        "stok": 100,
+        "kadaluarsa": "05-05-2027"
+    },
+    {
+        "kategori": "Minuman",
+        "nama": "Aqua Air Mineral",
+        "harga": 3500,
+        "stok": 150,
+        "ukuran_ml": 600
+    },
+    {
+        "kategori": "Minuman",
+        "nama": "Pocari Sweat",
+        "harga": 8000,
+        "stok": 60,
+        "ukuran_ml": 500
+    },
+    {
+        "kategori": "Minuman",
+        "nama": "Coca Cola",
+        "harga": 6500,
+        "stok": 45,
+        "ukuran_ml": 390
+    },
+    {
+        "kategori": "Minuman",
+        "nama": "Susu Ultra Coklat",
+        "harga": 7000,
+        "stok": 80,
+        "ukuran_ml": 250
+    },
+    {
+        "kategori": "Minuman",
+        "nama": "Teh Pucuk Harum",
+        "harga": 4000,
+        "stok": 120,
+        "ukuran_ml": 350
+    },
+    {
+        "kategori": "Mainan",
+        "nama": "Hot Wheels Reguler",
+        "harga": 35000,
+        "stok": 25,
+        "rekomendasi_umur": 3
+    },
+    {
+        "kategori": "Mainan",
+        "nama": "Lego Classic Blocks",
+        "harga": 150000,
+        "stok": 10,
+        "rekomendasi_umur": 4
+    },
+    {
+        "kategori": "Mainan",
+        "nama": "Rubik 3x3",
+        "harga": 45000,
+        "stok": 15,
+        "rekomendasi_umur": 7
+    },
+    {
+        "kategori": "Mainan",
+        "nama": "Kartu Uno",
+        "harga": 25000,
+        "stok": 30,
+        "rekomendasi_umur": 7
+    },
+    {
+        "kategori": "Mainan",
+        "nama": "Boneka Beruang Mini",
+        "harga": 60000,
+        "stok": 12,
+        "rekomendasi_umur": 2
+    }
+]

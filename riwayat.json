@@ -1,0 +1,29 @@
+[
+    {
+        "waktu": "2026-10-05 20:04:08",
+        "pembeli": "ica",
+        "items": [
+            {
+                "nama": "Oreo 133g",
+                "qty": 1,
+                "harga_satuan": 9000,
+                "subtotal": 9000
+            },
+            {
+                "nama": "Sari Roti Gandum",
+                "qty": 1,
+                "harga_satuan": 16200,
+                "subtotal": 16200
+            },
+            {
+                "nama": "Indomie Goreng",
+                "qty": 1,
+                "harga_satuan": 3150,
+                "subtotal": 3150
+            }
+        ],
+        "subtotal": 28350,
+        "potongan": 0,
+        "total_bayar": 28350
+    }
+]
