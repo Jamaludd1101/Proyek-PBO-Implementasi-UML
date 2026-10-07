@@ -103,5 +103,12 @@
         "harga": 60000,
         "stok": 12,
         "rekomendasi_umur": 2
+    },
+    {
+        "kategori": "Mainan",
+        "nama": "Batman",
+        "harga": 60000,
+        "stok": 12,
+        "rekomendasi_umur": 2
     }
 ]

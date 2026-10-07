@@ -1,8 +1,8 @@
 import json
 from datetime import datetime
 
-from produk import Produk, Makanan, Mainan, Minuman
 from pembeli import Pembeli, Voucher
+from produk import Mainan, Makanan, Minuman, Produk
 
 MENU_BELANJA = """
 --- Menu Belanja ---
@@ -19,7 +19,9 @@ def format_struk(s: dict) -> str:
     """Ubah dict struk menjadi teks yang rapi."""
     baris = [f"[{s['waktu']}] Pembeli: {s['pembeli']}"]
     for it in s["items"]:
-        baris.append(f"  {it['nama']} x{it['qty']} @ Rp{it['harga_satuan']} = Rp{it['subtotal']}")
+        baris.append(
+            f"  {it['nama']} x{it['qty']} @ Rp{it['harga_satuan']} = Rp{it['subtotal']}"
+        )
     baris.append(f"  Subtotal    : Rp{s['subtotal']}")
     if s["potongan"] > 0:
         baris.append(f"  Potongan    : -Rp{s['potongan']}")
@@ -37,7 +39,9 @@ class Transaksi:
     def hitung_total(self) -> int:
         total = self.__keranjang.total_harga()
         if self.__voucher:
-            total = self.__voucher.terapkan(total)  # terapkan() sudah mengecek syarat voucher
+            total = self.__voucher.terapkan(
+                total
+            )  # terapkan() sudah mengecek syarat voucher
         return total
 
     def cek_saldo(self) -> bool:
@@ -73,12 +77,14 @@ class Transaksi:
         daftar_item = []
         for barang in self.__keranjang.get_items():
             produk, qty = barang["produk"], barang["jumlah"]
-            daftar_item.append({
-                "nama": produk.nama,
-                "qty": qty,
-                "harga_satuan": produk.harga_akhir(),
-                "subtotal": produk.harga_akhir() * qty,
-            })
+            daftar_item.append(
+                {
+                    "nama": produk.nama,
+                    "qty": qty,
+                    "harga_satuan": produk.harga_akhir(),
+                    "subtotal": produk.harga_akhir() * qty,
+                }
+            )
         subtotal = self.__keranjang.total_harga()
         total = self.hitung_total()
         return {
@@ -129,6 +135,10 @@ class Toko:
     @property
     def nama(self) -> str:
         return self.__nama
+
+    @property
+    def daftar_produk(self):
+        return self.__daftar_produk
 
     # ---------- Produk ----------
     def tambah_produk(self, p: Produk):
@@ -200,7 +210,9 @@ class Toko:
                     except ValueError:
                         n = 0
                     if n > 0:
-                        pembeli.tambah_ke_keranjang(produk, n)  # stok dicek di Keranjang.tambah()
+                        pembeli.tambah_ke_keranjang(
+                            produk, n
+                        )  # stok dicek di Keranjang.tambah()
                     else:
                         print("Jumlah harus angka lebih dari 0.")
 
@@ -211,7 +223,9 @@ class Toko:
                 else:
                     for barang in items:
                         print(f"- {barang['produk'].nama} x{barang['jumlah']}")
-                    print(f"Total saat ini: Rp{Transaksi(pembeli, voucher).hitung_total()}")
+                    print(
+                        f"Total saat ini: Rp{Transaksi(pembeli, voucher).hitung_total()}"
+                    )
 
             elif pilih == "4":
                 produk = self.__minta_produk()
@@ -219,7 +233,9 @@ class Toko:
                     pembeli.keranjang.hapus(produk)
 
             elif pilih == "5":
-                voucher_baru = self.__daftar_voucher.get(input("Kode voucher: ").strip().upper())
+                voucher_baru = self.__daftar_voucher.get(
+                    input("Kode voucher: ").strip().upper()
+                )
                 if voucher_baru:
                     voucher = voucher_baru
                     print("Voucher dipasang.")
