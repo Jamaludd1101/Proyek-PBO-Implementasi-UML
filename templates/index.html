@@ -350,7 +350,6 @@ function renderKeranjang() {
 
   const jumlah = keranjang.reduce((t, i) => t + i.jumlah, 0);
   const subtotal = keranjang.reduce((t, i) => t + i.jumlah * i.harga, 0);
-  // Cek jika voucher aktif
   const potongan = voucherAktif ? Math.min(5000, subtotal) : 0;
   const total = subtotal - potongan;
 
@@ -410,13 +409,11 @@ function hapusKeranjang(nama) {
   renderKeranjang(); toast(nama + " dihapus dari keranjang.");
 }
 
-// 2. Event Listener Global (Klik Menu, Tab, Plus, Minus, Hapus)
+// 2. Event Listener Global
 document.addEventListener("click", e => {
-  // Filter
   const filterButton = e.target.closest("[data-filter]");
   if (filterButton) { filter = filterButton.dataset.filter; renderChips(); renderProduk(); return; }
 
-  // Tambah ke keranjang
   const tombolTambah = e.target.closest("[data-add]");
   if (tombolTambah) {
     const card = tombolTambah.closest(".card");
@@ -424,11 +421,9 @@ document.addEventListener("click", e => {
     tambahKeranjang(tombolTambah.dataset.add, jumlah); return;
   }
 
-  // Hapus dari keranjang
   const tombolHapus = e.target.closest("[data-hapus]");
   if (tombolHapus) { hapusKeranjang(tombolHapus.dataset.hapus); return; }
 
-  // Plus Minus
   const minus = e.target.closest("[data-minus]");
   if (minus) {
     const output = minus.closest(".card").querySelector("output");
@@ -443,7 +438,6 @@ document.addEventListener("click", e => {
     output.textContent = jumlah; return;
   }
 
-  // TAB MENU NAVIGASI
   const tabBtn = e.target.closest(".tab");
   if (tabBtn) {
     document.querySelectorAll(".tab").forEach(b => b.setAttribute("aria-selected", "false"));
@@ -454,7 +448,6 @@ document.addEventListener("click", e => {
     $("#tambah").hidden = target !== "tambah";
     $("#riwayat").hidden = target !== "riwayat";
 
-    // Merender tampilan tab riwayat
     if (target === "riwayat") {
       if (!riwayat.length) {
         $("#riwayat").innerHTML = '<p class="kosong" style="margin-top:20px">Belum ada riwayat transaksi.</p>';
@@ -467,7 +460,7 @@ document.addEventListener("click", e => {
             ${r.potongan > 0 ? `<div class="baris hemat"><span>Potongan</span><span>-${rupiah(r.potongan)}</span></div>` : ""}
             <div class="baris total"><span>Total bayar</span><span>${rupiah(r.total_bayar)}</span></div>
           </div>
-        `).reverse().join(""); // Data terbaru di atas
+        `).reverse().join("");
       }
     }
   }
@@ -494,9 +487,69 @@ $("#tiket").onclick = () => {
   toast("Voucher HEMAT5K berhasil diterapkan!");
 };
 
-// 4. FUNGSI TAMBAH PRODUK (Web Placeholder)
-$("#simpanProduk").onclick = () => {
-  toast("Fitur web ini sedang dikembangkan. Silakan gunakan CLI (main.py) untuk menambah produk.", true);
+// 4. FUNGSI TAMBAH PRODUK (Sudah Terhubung ke Backend)
+const fKat = $("#fKat");
+if (fKat) {
+  fKat.addEventListener("change", (e) => {
+    const val = e.target.value.toLowerCase();
+    const label = $("#lExtra");
+    const input = $("#fExtra");
+    
+    if (val === "makanan" || val === "Makanan") {
+      label.textContent = "Tanggal kadaluarsa";
+      input.type = "date";
+      input.placeholder = "";
+    } else if (val === "mainan" || val === "Mainan") {
+      label.textContent = "Rekomendasi umur (+)";
+      input.type = "number";
+      input.placeholder = "Contoh: 7";
+    } else if (val === "minuman" || val === "Minuman") {
+      label.textContent = "Ukuran (ml)";
+      input.type = "number";
+      input.placeholder = "Contoh: 500";
+    }
+  });
+}
+
+$("#simpanProduk").onclick = async () => {
+  const kategori = $("#fKat").value.toLowerCase();
+  const nama = $("#fNama").value.trim();
+  const harga = $("#fHarga").value;
+  const stok = $("#fStok").value;
+  const extra = $("#fExtra").value;
+
+  if (!nama || !harga || !stok || !extra) {
+    return toast("Mohon isi semua form produk.", true);
+  }
+
+  try {
+    const response = await fetch('/api/tambah_produk', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ kategori, nama, harga, stok, extra })
+    });
+    
+    const res = await response.json();
+    
+    if (res.status === 'sukses') {
+      toast(res.pesan);
+      
+      // Kosongkan form input setelah sukses
+      $("#fNama").value = "";
+      $("#fHarga").value = "";
+      $("#fStok").value = "";
+      $("#fExtra").value = "";
+      
+      // Update produk dan kembali ke halaman belanja
+      await muatProduk();
+      const tabBelanja = document.querySelector('.tab[data-tab="belanja"]');
+      if (tabBelanja) tabBelanja.click();
+    } else {
+      toast(res.pesan, true);
+    }
+  } catch (err) {
+    toast("Terjadi kesalahan jaringan saat menyimpan produk.", true);
+  }
 };
 
 // 5. Eksekusi Checkout ke Backend Flask API
@@ -539,7 +592,7 @@ $("#bayar").onclick = async () => {
       riwayat.push(struk);
       keranjang = [];
       voucherAktif = false;
-      $("#kodeVoucher").value = ""; // Reset form voucher
+      $("#kodeVoucher").value = ""; 
 
       simpanDataLocal();
       $("#isiStruk").innerHTML = `
@@ -552,7 +605,7 @@ $("#bayar").onclick = async () => {
         </div>`;
 
       $("#dStruk").showModal();
-      await muatProduk(); // Muat ulang stok produk terbaru
+      await muatProduk(); 
     } else {
       toast("Gagal memproses transaksi di server.", true);
     }
