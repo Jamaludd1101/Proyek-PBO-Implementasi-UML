@@ -350,6 +350,7 @@ function renderKeranjang() {
 
   const jumlah = keranjang.reduce((t, i) => t + i.jumlah, 0);
   const subtotal = keranjang.reduce((t, i) => t + i.jumlah * i.harga, 0);
+  // Cek jika voucher aktif
   const potongan = voucherAktif ? Math.min(5000, subtotal) : 0;
   const total = subtotal - potongan;
 
@@ -409,10 +410,13 @@ function hapusKeranjang(nama) {
   renderKeranjang(); toast(nama + " dihapus dari keranjang.");
 }
 
+// 2. Event Listener Global (Klik Menu, Tab, Plus, Minus, Hapus)
 document.addEventListener("click", e => {
+  // Filter
   const filterButton = e.target.closest("[data-filter]");
   if (filterButton) { filter = filterButton.dataset.filter; renderChips(); renderProduk(); return; }
 
+  // Tambah ke keranjang
   const tombolTambah = e.target.closest("[data-add]");
   if (tombolTambah) {
     const card = tombolTambah.closest(".card");
@@ -420,28 +424,82 @@ document.addEventListener("click", e => {
     tambahKeranjang(tombolTambah.dataset.add, jumlah); return;
   }
 
+  // Hapus dari keranjang
   const tombolHapus = e.target.closest("[data-hapus]");
   if (tombolHapus) { hapusKeranjang(tombolHapus.dataset.hapus); return; }
 
+  // Plus Minus
   const minus = e.target.closest("[data-minus]");
   if (minus) {
     const output = minus.closest(".card").querySelector("output");
     output.textContent = Math.max(1, Number(output.textContent) - 1); return;
   }
-
   const plus = e.target.closest("[data-plus]");
   if (plus) {
     const card = plus.closest(".card"), output = card.querySelector("output");
     let jumlah = Number(output.textContent);
     const p = produk.find(x => x.nama === plus.dataset.plus);
     if (p) jumlah = Math.min(p.stok, jumlah + 1);
-    output.textContent = jumlah;
+    output.textContent = jumlah; return;
+  }
+
+  // TAB MENU NAVIGASI
+  const tabBtn = e.target.closest(".tab");
+  if (tabBtn) {
+    document.querySelectorAll(".tab").forEach(b => b.setAttribute("aria-selected", "false"));
+    tabBtn.setAttribute("aria-selected", "true");
+
+    const target = tabBtn.dataset.tab;
+    $("#belanja").hidden = target !== "belanja";
+    $("#tambah").hidden = target !== "tambah";
+    $("#riwayat").hidden = target !== "riwayat";
+
+    // Merender tampilan tab riwayat
+    if (target === "riwayat") {
+      if (!riwayat.length) {
+        $("#riwayat").innerHTML = '<p class="kosong" style="margin-top:20px">Belum ada riwayat transaksi.</p>';
+      } else {
+        $("#riwayat").innerHTML = riwayat.map(r => `
+          <div class="struk" style="max-width:500px; margin-bottom:15px; box-shadow:0 3px 0 var(--line);">
+            <div class="t">${r.pembeli} · ${r.waktu}</div>
+            ${r.items.map(i => `<div class="baris"><span>${i.nama} x${i.qty}</span><span>${rupiah(i.subtotal)}</span></div>`).join("")}
+            <div class="baris" style="margin-top:8px; padding-top:8px; border-top:1px dashed var(--line);"><span>Subtotal</span><span>${rupiah(r.subtotal)}</span></div>
+            ${r.potongan > 0 ? `<div class="baris hemat"><span>Potongan</span><span>-${rupiah(r.potongan)}</span></div>` : ""}
+            <div class="baris total"><span>Total bayar</span><span>${rupiah(r.total_bayar)}</span></div>
+          </div>
+        `).reverse().join(""); // Data terbaru di atas
+      }
+    }
   }
 });
 
 $("#cari").addEventListener("input", renderProduk);
 
-// 2. Eksekusi Checkout ke Backend Flask API (Mengurangi stok di JSON)
+// 3. FUNGSI VOUCHER
+$("#pakaiVoucher").onclick = () => {
+  const kode = $("#kodeVoucher").value.trim().toUpperCase();
+  if (kode === "HEMAT5K") {
+    voucherAktif = true;
+    renderKeranjang();
+    toast("Voucher HEMAT5K berhasil diterapkan!");
+  } else {
+    toast("Kode voucher tidak valid.", true);
+  }
+};
+
+$("#tiket").onclick = () => {
+  voucherAktif = true;
+  $("#kodeVoucher").value = "HEMAT5K";
+  renderKeranjang();
+  toast("Voucher HEMAT5K berhasil diterapkan!");
+};
+
+// 4. FUNGSI TAMBAH PRODUK (Web Placeholder)
+$("#simpanProduk").onclick = () => {
+  toast("Fitur web ini sedang dikembangkan. Silakan gunakan CLI (main.py) untuk menambah produk.", true);
+};
+
+// 5. Eksekusi Checkout ke Backend Flask API
 $("#bayar").onclick = async () => {
   if (!pembeli) { bukaLogin(); return; }
   if (!keranjang.length) return toast("Keranjang masih kosong.", true);
@@ -481,19 +539,20 @@ $("#bayar").onclick = async () => {
       riwayat.push(struk);
       keranjang = [];
       voucherAktif = false;
+      $("#kodeVoucher").value = ""; // Reset form voucher
 
       simpanDataLocal();
       $("#isiStruk").innerHTML = `
         <div class="struk">
           <div class="t">${struk.pembeli} · ${struk.waktu}</div>
           ${struk.items.map(i => `<div class="baris"><span>${i.nama} x${i.qty}</span><span>${rupiah(i.subtotal)}</span></div>`).join("")}
-          <div class="baris"><span>Subtotal</span><span>${rupiah(struk.subtotal)}</span></div>
+          <div class="baris" style="margin-top:8px; padding-top:8px; border-top:1px dashed var(--line);"><span>Subtotal</span><span>${rupiah(struk.subtotal)}</span></div>
           ${struk.potongan > 0 ? `<div class="baris hemat"><span>Potongan</span><span>-${rupiah(struk.potongan)}</span></div>` : ""}
           <div class="baris total"><span>Total bayar</span><span>${rupiah(struk.total_bayar)}</span></div>
         </div>`;
 
       $("#dStruk").showModal();
-      await muatProduk(); // Muat ulang stok produk dari JSON
+      await muatProduk(); // Muat ulang stok produk terbaru
     } else {
       toast("Gagal memproses transaksi di server.", true);
     }
