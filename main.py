@@ -1,5 +1,5 @@
-from toko import Toko
 from pembeli import Pembeli
+from toko import Toko
 
 
 def input_angka(pesan: str) -> int:
